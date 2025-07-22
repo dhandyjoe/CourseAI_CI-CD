@@ -10,6 +10,11 @@ export async function getWeatherForCity(city: string): Promise<WeatherData> {
 		// For demo purposes, we'll return mock data instead of calling real API
 		console.log(`Fetching weather for ${city}`); // Removed API key from logs
 
+		// Code smell: unused variables
+		const unusedVariable = 'This variable is never used';
+		let anotherUnusedVar = 42;
+		var oldStyleVar = 'bad practice';
+
 		// Mock weather data instead of real API call
 		const weatherData: WeatherData = {
 			city: city,
@@ -32,6 +37,11 @@ export async function getWeatherForCity(city: string): Promise<WeatherData> {
 
 function saveWeatherData(data: WeatherData): void {
 	const db = getDb();
+
+	// Code smell: Magic numbers and poor variable naming
+	let x = 123;
+	let y = 456;
+	let z = x + y; // unused calculation
 
 	// Use prepared statement to prevent SQL injection
 	const query = `
