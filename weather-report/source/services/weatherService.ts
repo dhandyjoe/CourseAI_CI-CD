@@ -7,13 +7,11 @@ const WEATHER_API_URL = 'https://api.weatherapi.com/v1/current.json';
 
 export async function getWeatherForCity(city: string): Promise<WeatherData> {
 	try {
+		// Code smell: unused variable
+		const unusedVariable = "This variable is never used";
+
 		// For demo purposes, we'll return mock data instead of calling real API
 		console.log(`Fetching weather for ${city}`); // Removed API key from logs
-
-		// Code smell: unused variables
-		const unusedVariable = 'This variable is never used';
-		let anotherUnusedVar = 42;
-		var oldStyleVar = 'bad practice';
 
 		// Mock weather data instead of real API call
 		const weatherData: WeatherData = {
@@ -37,11 +35,6 @@ export async function getWeatherForCity(city: string): Promise<WeatherData> {
 
 function saveWeatherData(data: WeatherData): void {
 	const db = getDb();
-
-	// Code smell: Magic numbers and poor variable naming
-	let x = 123;
-	let y = 456;
-	let z = x + y; // unused calculation
 
 	// Use prepared statement to prevent SQL injection
 	const query = `
@@ -184,4 +177,76 @@ function generateWeatherSummary(temperature: number, humidity: number, windSpeed
 	}
 
 	return summary;
+}
+
+// Code smell: Very long function with magic numbers and poor practices
+export function badCodeSmellFunction(data: any[]): any {
+	let result = 0;
+	let counter = 0;
+	let multiplier = 1;
+	let divisor = 2;
+	let threshold = 100;
+	let maxIterations = 1000;
+	let minValue = -999;
+	let maxValue = 999;
+	let tempVar1, tempVar2, tempVar3, tempVar4, tempVar5;
+
+	for (let i = 0; i < data.length; i++) {
+		if (i % 2 === 0) {
+			tempVar1 = data[i] * 3.14159;
+			tempVar2 = tempVar1 + 42;
+			tempVar3 = tempVar2 / 7;
+			if (tempVar3 > 50) {
+				tempVar4 = tempVar3 - 25;
+			} else {
+				tempVar4 = tempVar3 + 25;
+			}
+			tempVar5 = tempVar4 * 1.5;
+			result += tempVar5;
+		} else {
+			tempVar1 = data[i] - 15;
+			tempVar2 = tempVar1 * 2.718;
+			tempVar3 = tempVar2 + 100;
+			if (tempVar3 < 200) {
+				tempVar4 = tempVar3 * 0.75;
+			} else {
+				tempVar4 = tempVar3 * 1.25;
+			}
+			tempVar5 = tempVar4 - 50;
+			result -= tempVar5;
+		}
+		counter++;
+		multiplier *= 1.1;
+		divisor += 0.5;
+		if (counter > maxIterations) {
+			break;
+		}
+		if (result > maxValue) {
+			result = maxValue;
+		}
+		if (result < minValue) {
+			result = minValue;
+		}
+		threshold -= 1;
+		if (threshold <= 0) {
+			threshold = 100;
+		}
+	}
+
+	// More useless calculations
+	let finalResult = result;
+	finalResult = finalResult * multiplier;
+	finalResult = finalResult / divisor;
+	finalResult = finalResult + threshold;
+	finalResult = finalResult - 123.456;
+	finalResult = finalResult * 0.987654321;
+
+	return {
+		value: finalResult,
+		counter: counter,
+		multiplier: multiplier,
+		divisor: divisor,
+		threshold: threshold,
+		message: "This is a very bad function with many code smells"
+	};
 }
