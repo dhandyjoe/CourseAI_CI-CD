@@ -24,45 +24,17 @@ initDb();
 // Routes
 app.use('/api/weather', weatherRoutes);
 
-// Basic error handler - very generic (vulnerability: doesn't hide implementation details)
+// Basic error handler
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: err.message,
-    stack: err.stack // Exposing stack trace is a security vulnerability
-  });
+	console.error('Application error occurred');
+	res.status(500).json({
+		error: 'Internal server error'
+	});
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+	console.log(`Server is running on port ${PORT}`);
 });
-
-// Zombie code - unused function that never gets called
-function checkSystemHealth() {
-  console.log('Checking system health...');
-  
-  // More dead code
-  const memoryUsage = process.memoryUsage();
-  const cpuInfo = require('os').cpus();
-  
-  return {
-    status: 'ok',
-    memory: memoryUsage,
-    cpu: cpuInfo
-  };
-}
-
-/* 
-  Commented out code that doesn't do anything useful
-  This is just here to demonstrate a code smell
-  
-  function oldAuthFunction(user, pass) {
-    if (user === 'admin' && pass === 'password') {
-      return true;
-    }
-    return false;
-  }
-*/
 
 export default app;

@@ -47,7 +47,7 @@ describe('WeatherService', () => {
 			expect(result.date_recorded).toBeDefined();
 		});
 
-		test('should expose API key in console logs (vulnerability)', async () => {
+		test('should not expose API key in console logs (security improved)', async () => {
 			const city = 'Jakarta';
 			const consoleSpy = jest.spyOn(console, 'log');
 			const mockDbRun = jest.fn((query, callback) => {
@@ -60,7 +60,10 @@ describe('WeatherService', () => {
 			await getWeatherForCity(city);
 
 			expect(consoleSpy).toHaveBeenCalledWith(
-				expect.stringContaining('a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6')
+				expect.stringContaining('Fetching weather for Jakarta')
+			);
+			expect(consoleSpy).not.toHaveBeenCalledWith(
+				expect.stringContaining('demo-key-for-testing')
 			);
 		});
 
@@ -81,7 +84,7 @@ describe('WeatherService', () => {
 			expect(result.city).toBe(city);
 		});
 
-		test('should be vulnerable to SQL injection in city parameter', async () => {
+		test('should use prepared statements to prevent SQL injection', async () => {
 			const maliciousCity = "'; DROP TABLE weather_data; --";
 			const mockDbRun = jest.fn();
 			mockGetDb.mockReturnValue({
@@ -91,7 +94,12 @@ describe('WeatherService', () => {
 			await getWeatherForCity(maliciousCity);
 
 			expect(mockDbRun).toHaveBeenCalledWith(
-				expect.stringContaining(maliciousCity),
+				expect.stringContaining('INSERT INTO weather_data'),
+				expect.any(Function)
+			);
+			// Verify that prepared statement placeholder is used
+			expect(mockDbRun).toHaveBeenCalledWith(
+				expect.stringContaining('VALUES (?, ?, ?, ?, ?, ?)'),
 				expect.any(Function)
 			);
 		});

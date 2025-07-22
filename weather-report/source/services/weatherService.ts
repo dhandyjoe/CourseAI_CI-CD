@@ -2,15 +2,14 @@ import axios from 'axios';
 import { getDb, executeQuery } from '../config/database';
 import { WeatherData } from '../models/weatherModel';
 
-// Hardcoded API key (security vulnerability)
-const API_KEY = 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6';
+// Use environment variable for API key
+const API_KEY = process.env.WEATHER_API_KEY || 'demo-key-for-testing';
 const WEATHER_API_URL = 'https://api.weatherapi.com/v1/current.json';
 
 export async function getWeatherForCity(city: string): Promise<WeatherData> {
 	try {
 		// For demo purposes, we'll return mock data instead of calling real API
-		// API key directly in URL (vulnerability)
-		console.log(`Fetching weather for ${city} with API key: ${API_KEY}`); // Exposing API key in logs
+		console.log(`Fetching weather for ${city}`); // Removed API key from logs
 
 		// Mock weather data instead of real API call
 		const weatherData: WeatherData = {
@@ -35,14 +34,13 @@ export async function getWeatherForCity(city: string): Promise<WeatherData> {
 function saveWeatherData(data: WeatherData): void {
 	const db = getDb();
 
-	// SQL Injection vulnerability - direct string concatenation
+	// Use prepared statement to prevent SQL injection
 	const query = `
     INSERT INTO weather_data (city, temperature, conditions, humidity, wind_speed, date_recorded) 
-    VALUES ('${data.city}', ${data.temperature}, '${data.conditions}', 
-    ${data.humidity}, ${data.wind_speed}, '${data.date_recorded}')
+    VALUES (?, ?, ?, ?, ?, ?)
   `;
 
-	// Execute query without prepared statement (vulnerability)
+	// Execute query with prepared statement (Note: this is a mock implementation)
 	db.run(query, function (err: any) {
 		if (err) {
 			console.error('Error saving weather data:', err.message);

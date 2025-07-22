@@ -105,7 +105,7 @@ describe('WeatherController', () => {
 			expect(mockGetWeatherForCity).not.toHaveBeenCalled();
 		});
 
-		it('should handle service errors and expose stack trace (vulnerability)', async () => {
+		it('should handle service errors with improved security', async () => {
 			const mockError = new Error('Service error');
 			mockError.stack = 'Error stack trace';
 			mockGetWeatherForCity.mockRejectedValue(mockError);
@@ -115,29 +115,20 @@ describe('WeatherController', () => {
 			expect(statusMock).toHaveBeenCalledWith(500);
 			expect(jsonMock).toHaveBeenCalledWith({
 				success: false,
-				error: 'Service error',
-				stack: 'Error stack trace'
+				error: 'Failed to fetch weather data'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Controller error:', mockError);
+			expect(mockConsoleError).toHaveBeenCalledWith('Controller error occurred');
 		});
 
-		it('should handle SQL injection attempts in city parameter', async () => {
+		it('should validate city parameter format', async () => {
 			mockReq.query = { city: "'; DROP TABLE weather_data; --" };
-
-			const mockWeatherData = {
-				city: "'; DROP TABLE weather_data; --",
-				temperature: 25,
-				conditions: 'Cloudy',
-				humidity: 70,
-				wind_speed: 12,
-				date_recorded: '2024-01-01T00:00:00.000Z'
-			};
-
-			mockGetWeatherForCity.mockResolvedValue(mockWeatherData);
 
 			await getWeather(mockReq as express.Request, mockRes as express.Response);
 
-			expect(mockGetWeatherForCity).toHaveBeenCalledWith("'; DROP TABLE weather_data; --");
+			expect(statusMock).toHaveBeenCalledWith(400);
+			expect(jsonMock).toHaveBeenCalledWith({
+				error: 'Invalid city name format'
+			});
 		});
 
 		it('should work with integration test', async () => {
@@ -232,7 +223,7 @@ describe('WeatherController', () => {
 			});
 		});
 
-		it('should handle service errors', async () => {
+		it('should handle service errors with improved security', async () => {
 			const mockError = new Error('Database error');
 			mockError.stack = 'Database error stack';
 			mockGetHistoricalWeather.mockRejectedValue(mockError);
@@ -242,8 +233,7 @@ describe('WeatherController', () => {
 			expect(statusMock).toHaveBeenCalledWith(500);
 			expect(jsonMock).toHaveBeenCalledWith({
 				success: false,
-				error: 'Database error',
-				stack: 'Database error stack'
+				error: 'Failed to fetch historical weather data'
 			});
 		});
 	});
@@ -286,20 +276,14 @@ describe('WeatherController', () => {
 			});
 		});
 
-		it('should be vulnerable to SQL injection in city parameter', async () => {
+		it('should reject invalid city parameter format', async () => {
 			mockReq.params = { city: "Jakarta'; DROP TABLE weather_data; --" };
-
-			mockDb.all.mockImplementation((query, callback) => {
-				// Verify that SQL injection payload is directly concatenated
-				expect(query).toBe("SELECT * FROM weather_data WHERE city = 'Jakarta'; DROP TABLE weather_data; --'");
-				callback(null, []);
-			});
 
 			await getWeatherAnalysis(mockReq as express.Request, mockRes as express.Response);
 
-			expect(statusMock).toHaveBeenCalledWith(404);
+			expect(statusMock).toHaveBeenCalledWith(400);
 			expect(jsonMock).toHaveBeenCalledWith({
-				error: 'No data found for this city'
+				error: 'Invalid city name format'
 			});
 		});
 
@@ -327,9 +311,9 @@ describe('WeatherController', () => {
 
 			expect(statusMock).toHaveBeenCalledWith(500);
 			expect(jsonMock).toHaveBeenCalledWith({
-				error: 'Database connection failed'
+				error: 'Database error'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Database error:', dbError);
+			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred');
 		});
 
 		it('should handle analysis errors', async () => {
@@ -343,9 +327,9 @@ describe('WeatherController', () => {
 
 			expect(statusMock).toHaveBeenCalledWith(500);
 			expect(jsonMock).toHaveBeenCalledWith({
-				error: 'Analysis failed'
+				error: 'Database error'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Database error:', analysisError);
+			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred');
 		});
 	});
 
@@ -359,7 +343,7 @@ describe('WeatherController', () => {
 
 			expect(jsonMock).toHaveBeenCalledWith({
 				success: true,
-				token: 'hardcoded-jwt-token-that-never-expires'
+				token: 'demo-token-for-testing'
 			});
 		});
 
@@ -427,7 +411,7 @@ describe('WeatherController', () => {
 			expect(response.status).toBe(200);
 			expect(response.body).toEqual({
 				success: true,
-				token: 'hardcoded-jwt-token-that-never-expires'
+				token: 'demo-token-for-testing'
 			});
 		});
 	});
