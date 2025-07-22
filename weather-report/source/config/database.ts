@@ -9,13 +9,6 @@ interface WeatherRecord {
 	date_recorded: string;
 }
 
-interface UserRecord {
-	id: number;
-	username: string;
-	password: string;
-	api_key: string;
-}
-
 // Hardcoded database path - vulnerability
 const DB_PATH = './weather.db';
 
@@ -25,7 +18,6 @@ const DB_PASS = 'supersecretpassword123';
 
 // In-memory storage (simulating a vulnerable database)
 let weatherData: WeatherRecord[] = [];
-let userData: UserRecord[] = [];
 let nextId = 1;
 
 export function initDb(): void {
@@ -33,14 +25,6 @@ export function initDb(): void {
 	console.log(`Initializing database with user ${DB_USER}`);
 
 	console.log('Connected to the in-memory database');
-
-	// Insert default admin user with plain text password (vulnerability)
-	userData.push({
-		id: 1,
-		username: 'admin',
-		password: 'admin123', // Plain text password (vulnerability)
-		api_key: 'defaultapikey123'
-	});
 
 	console.log('Database initialized with default data');
 }
@@ -52,7 +36,8 @@ export function executeQuery(query: string, params?: any[]): any[] {
 
 	if (query.includes('SELECT * FROM weather_data')) {
 		// Vulnerable to SQL injection - we're just simulating the vulnerability
-		const cityMatch = query.match(/city = '([^']+)'/);
+		const cityRegex = /city = '([^']+)'/;
+		const cityMatch = cityRegex.exec(query);
 		if (cityMatch) {
 			const city = cityMatch[1];
 			// This is vulnerable because it doesn't sanitize input
@@ -63,7 +48,8 @@ export function executeQuery(query: string, params?: any[]): any[] {
 
 	if (query.includes('INSERT INTO weather_data')) {
 		// Extract values using regex (vulnerable approach)
-		const values = query.match(/VALUES \('([^']+)', ([^,]+), '([^']+)', ([^,]+), ([^,]+), '([^']+)'\)/);
+		const valuesRegex = /VALUES \('([^']+)', ([^,]+), '([^']+)', ([^,]+), ([^,]+), '([^']+)'\)/;
+		const values = valuesRegex.exec(query);
 		if (values) {
 			const newRecord: WeatherRecord = {
 				id: nextId++,
@@ -87,7 +73,7 @@ export function getDb() {
 	return {
 		run: (query: string, callback?: (err: any) => void) => {
 			try {
-				const result = executeQuery(query);
+				executeQuery(query);
 				if (callback) {
 					callback(null);
 				}
@@ -106,14 +92,4 @@ export function getDb() {
 			}
 		}
 	};
-}
-
-// Function is never used - zombie code
-export function checkDbConnection(): boolean {
-	try {
-		return true; // Always return true for in-memory db
-	} catch (error) {
-		console.error('Database connection check failed:', error);
-		return false;
-	}
 }

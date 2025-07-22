@@ -117,7 +117,7 @@ describe('WeatherController', () => {
 				success: false,
 				error: 'Failed to fetch weather data'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Controller error occurred');
+			expect(mockConsoleError).toHaveBeenCalledWith('Controller error occurred:', 'Service error');
 		});
 
 		it('should validate city parameter format', async () => {
@@ -313,7 +313,7 @@ describe('WeatherController', () => {
 			expect(jsonMock).toHaveBeenCalledWith({
 				error: 'Database error'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred');
+			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred:', 'Database connection failed');
 		});
 
 		it('should handle analysis errors', async () => {
@@ -329,7 +329,7 @@ describe('WeatherController', () => {
 			expect(jsonMock).toHaveBeenCalledWith({
 				error: 'Database error'
 			});
-			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred');
+			expect(mockConsoleError).toHaveBeenCalledWith('Database error occurred:', 'Analysis failed');
 		});
 	});
 

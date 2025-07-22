@@ -25,7 +25,7 @@ export async function getWeather(req: Request, res: Response): Promise<void> {
 			data: data
 		});
 	} catch (error: any) {
-		console.error('Controller error occurred');
+		console.error('Controller error occurred:', error.message);
 		res.status(500).json({
 			success: false,
 			error: 'Failed to fetch weather data'
@@ -57,7 +57,7 @@ export async function getCityHistory(req: Request, res: Response): Promise<void>
 			data: data
 		});
 	} catch (error: any) {
-		console.error('Controller error occurred');
+		console.error('Controller error occurred:', error.message);
 		res.status(500).json({
 			success: false,
 			error: 'Failed to fetch historical weather data'
@@ -89,7 +89,7 @@ export async function getWeatherAnalysis(req: Request, res: Response): Promise<v
 
 		db.all(query, async (err: any, rows: any) => {
 			if (err) {
-				console.error('Database error occurred');
+				console.error('Database error occurred:', err.message);
 				res.status(500).json({ error: 'Database error' });
 				return;
 			}
@@ -109,7 +109,7 @@ export async function getWeatherAnalysis(req: Request, res: Response): Promise<v
 			});
 		});
 	} catch (error: any) {
-		console.error('Analysis error occurred');
+		console.error('Analysis error occurred:', error.message);
 		res.status(500).json({
 			success: false,
 			error: 'Failed to analyze weather data'

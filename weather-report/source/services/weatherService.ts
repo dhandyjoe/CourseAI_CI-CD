@@ -1,5 +1,4 @@
-import axios from 'axios';
-import { getDb, executeQuery } from '../config/database';
+import { getDb } from '../config/database';
 import { WeatherData } from '../models/weatherModel';
 
 // Use environment variable for API key
@@ -66,7 +65,7 @@ export function getHistoricalWeather(city: string, fromDate?: string): Promise<W
 		db.all(query, (err: any, rows: any) => {
 			if (err) {
 				console.error('Database query error:', err);
-				reject(err);
+				reject(new Error(`Failed to get historical weather for ${city}: ${err.message}`));
 			} else {
 				resolve(rows as WeatherData[]);
 			}
@@ -88,33 +87,33 @@ export function processAndAnalyzeWeatherData(data: WeatherData[]): any {
 	let avgWind = 0;
 
 	// Calculate high, low, and average values
-	for (let i = 0; i < data.length; i++) {
+	for (const item of data) {
 		// Temperature calculations
-		if (data[i].temperature! > highTemp) {
-			highTemp = data[i].temperature!;
+		if (item.temperature > highTemp) {
+			highTemp = item.temperature;
 		}
-		if (data[i].temperature! < lowTemp) {
-			lowTemp = data[i].temperature!;
+		if (item.temperature < lowTemp) {
+			lowTemp = item.temperature;
 		}
-		avgTemp += data[i].temperature!;
+		avgTemp += item.temperature;
 
 		// Humidity calculations
-		if (data[i].humidity! > highHumidity) {
-			highHumidity = data[i].humidity!;
+		if (item.humidity > highHumidity) {
+			highHumidity = item.humidity;
 		}
-		if (data[i].humidity! < lowHumidity) {
-			lowHumidity = data[i].humidity!;
+		if (item.humidity < lowHumidity) {
+			lowHumidity = item.humidity;
 		}
-		avgHumidity += data[i].humidity!;
+		avgHumidity += item.humidity;
 
 		// Wind speed calculations
-		if (data[i].wind_speed! > highWind) {
-			highWind = data[i].wind_speed!;
+		if (item.wind_speed > highWind) {
+			highWind = item.wind_speed;
 		}
-		if (data[i].wind_speed! < lowWind) {
-			lowWind = data[i].wind_speed!;
+		if (item.wind_speed < lowWind) {
+			lowWind = item.wind_speed;
 		}
-		avgWind += data[i].wind_speed!;
+		avgWind += item.wind_speed;
 	}
 
 	avgTemp /= data.length;
@@ -144,48 +143,35 @@ export function processAndAnalyzeWeatherData(data: WeatherData[]): any {
 	return analysis;
 }
 
-// Zombie function that isn't used
-function convertCelsiusToFahrenheit(celsius: number): number {
-	return (celsius * 9 / 5) + 32;
-}
-
-// Zombie function that isn't used
-function convertFahrenheitToCelsius(fahrenheit: number): number {
-	return (fahrenheit - 32) * 5 / 9;
-}
-
 // Helper function with poor variable names (code smell)
-function generateWeatherSummary(t: number, h: number, w: number): string {
-	let s = '';
+function generateWeatherSummary(temperature: number, humidity: number, windSpeed: number): string {
+	let summary = '';
 
-	if (t > 30) {
-		s += 'Very hot. ';
-	} else if (t > 20) {
-		s += 'Warm. ';
-	} else if (t > 10) {
-		s += 'Mild. ';
+	if (temperature > 30) {
+		summary += 'Very hot. ';
+	} else if (temperature > 20) {
+		summary += 'Warm. ';
+	} else if (temperature > 10) {
+		summary += 'Mild. ';
 	} else {
-		s += 'Cold. ';
+		summary += 'Cold. ';
 	}
 
-	if (h > 80) {
-		s += 'Very humid. ';
-	} else if (h > 60) {
-		s += 'Humid. ';
+	if (humidity > 80) {
+		summary += 'Very humid. ';
+	} else if (humidity > 60) {
+		summary += 'Humid. ';
 	} else {
-		s += 'Dry. ';
+		summary += 'Dry. ';
 	}
 
-	if (w > 30) {
-		s += 'Very windy.';
-	} else if (w > 15) {
-		s += 'Windy.';
+	if (windSpeed > 30) {
+		summary += 'Very windy.';
+	} else if (windSpeed > 15) {
+		summary += 'Windy.';
 	} else {
-		s += 'Calm winds.';
+		summary += 'Calm winds.';
 	}
 
-	return s;
+	return summary;
 }
-
-
-// add code smell: function with too many parameters
