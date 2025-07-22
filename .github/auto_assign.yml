@@ -1,0 +1,13 @@
+# Auto assign configuration
+assignees:
+  - dhandyjoe  # Repository owner
+
+# Assign to pull requests
+pull_request:
+  assignees:
+    - dhandyjoe
+
+# Assign to issues  
+issue:
+  assignees:
+    - dhandyjoe
