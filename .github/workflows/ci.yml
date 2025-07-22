@@ -69,3 +69,39 @@ jobs:
         flags: unittests
         name: codecov-umbrella
       continue-on-error: true
+
+  # Job ketiga: SonarCloud Analysis
+  sonarcloud:
+    runs-on: ubuntu-latest
+    name: SonarCloud Analysis
+    needs: [lint, test]  # Job ini akan dijalankan setelah lint dan test berhasil
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: weather-report/package.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./weather-report
+    
+    - name: Run tests for coverage
+      run: npm run test:coverage
+      working-directory: ./weather-report
+      continue-on-error: true
+    
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      with:
+        projectBaseDir: ./weather-report
