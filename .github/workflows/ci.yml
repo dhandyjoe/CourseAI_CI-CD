@@ -1,0 +1,71 @@
+name: CI Pipeline
+
+# Trigger workflow pada push ke branch master
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # Job pertama: Linting
+  lint:
+    runs-on: ubuntu-latest
+    name: Code Linting
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: weather-report/package.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./weather-report
+    
+    - name: Run ESLint
+      run: npm run lint
+      working-directory: ./weather-report
+  
+  # Job kedua: Testing (depends on lint job)
+  test:
+    runs-on: ubuntu-latest
+    name: Run Tests
+    needs: lint  # Job ini akan dijalankan setelah job lint berhasil
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: weather-report/package.json
+    
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./weather-report
+    
+    - name: Run tests
+      run: npm test
+      working-directory: ./weather-report
+    
+    - name: Generate test coverage
+      run: npm run test:coverage
+      working-directory: ./weather-report
+      continue-on-error: true
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./weather-report/coverage/lcov.info
+        flags: unittests
+        name: codecov-umbrella
+      continue-on-error: true
