@@ -4,16 +4,20 @@ on:
     types: [opened]
   pull_request:
     types: [opened]
+
 jobs:
-  run:
+  auto-assign:
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
+      contents: read
     steps:
-    - name: 'Auto-assign issue'
-      uses: pozil/auto-assign-issue@v1
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Auto assign
+      uses: kentaro-m/auto-assign-action@v1.2.6
       with:
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: ld-binar-2024
-          numOfAssignee: 1
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        configuration-path: '.github/auto_assign.yml'
